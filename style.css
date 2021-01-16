@@ -69,3 +69,38 @@ a {
   text-decoration: none;
 }
 
+code {
+  display: block;
+  white-space: pre-line;   
+}
+
+.banner {
+  width: 100%;
+}
+
+.half-display {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.half-display img {
+  width: 50rem;
+}
+
+.half-display div {
+  margin: 5rem;
+  width: 50%;
+}
+
+.circuit img {
+  width: 20rem;
+}
+
+.description {
+  display:flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  align-items:center;
+  justify-content:center;
+}

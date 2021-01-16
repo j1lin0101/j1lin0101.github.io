@@ -1,0 +1,85 @@
+<!DOCTYPE html> 
+<html>
+    <head> 
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+        <title>A1: Blink!</title> 
+
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+        
+
+    </head> 
+
+    <body>
+        <div class="header">
+            <h1>A1: Blink!</h1>
+        </div>
+        
+        <div class="banner">
+            <img src="A1-Imgs/lights.gif">
+        </div>
+        
+        <div class="half-display">
+
+            <div>
+                <h2>Schematic</h2>
+                <img src="A1-Imgs/scheme.jpeg">
+            </div>
+            
+            <div>
+                <h2>Calculations</h2>
+                <img src="A1-Imgs/calc.jpg">
+            </div>
+            
+        </div>
+
+        <div class="description">
+            <h2>Circuit-Code Description</h2>
+            <p>Since each bulb is in parallel (same voltage and equal current all around), I use 220 ohm resistors for each bulb.</p>
+            <p>The white, green, and red bulbs are linked to ports 11, 12, and 13 respectively. Going in reverse numerical order, each bulb will power on for half a second and power off in the reverse of the first sequence for half a second.</p>
+        </div>
+
+        <div class="half-display">
+            <div>
+                <h2>Code</h2>
+                <code>
+                    // Setup light timer to Half a Second
+                    int timer = 500;
+                            
+                    void setup() {
+                        // Initialize Pins 11-13 for LEDs
+                        pinMode(13, OUTPUT);
+                        pinMode(12, OUTPUT);
+                        pinMode(11, OUTPUT);
+                    }
+
+                    void loop() {
+                            
+                        //Loop through pins 11-13 to turn them on for half a second
+                        for(int pinNum = 13; pinNum >= 11; pinNum--) {
+                            digitalWrite(pinNum, HIGH);
+                            delay(timer);
+                        }
+                                
+                        //Loop through pins 11-13 in reverse order to turn them off for half a second
+                        for(int pinNum = 11; pinNum <= 13; pinNum++) { 
+                            digitalWrite(pinNum, LOW); 
+                            delay(timer); 
+                        } 
+                    }
+                </code>
+            </div>
+            
+            <div class="circuit">
+                <h2>Circuit</h2>
+                <img src="A1-Imgs/top-view.png">
+                <img src="A1-Imgs/close.png">
+            </div>
+        </div>
+
+        
+        
+        
+    </body>
+</html>
