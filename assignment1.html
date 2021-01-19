@@ -56,14 +56,16 @@
 
                     void loop() {
                             
-                        //Loop through pins 11-13 to turn them on for half a second
+                        //Loop through pins 11-13 backwards order
                         for(int pinNum = 13; pinNum >= 11; pinNum--) {
+                            //Set respective pin to turn on High for half a second
                             digitalWrite(pinNum, HIGH);
                             delay(timer);
                         }
                                 
-                        //Loop through pins 11-13 in reverse order to turn them off for half a second
-                        for(int pinNum = 11; pinNum <= 13; pinNum++) { 
+                        //Loop through pins 11-13 
+                        for(int pinNum = 11; pinNum <= 13; pinNum++) {
+                            //Set respective pin to turn on Low for half a second 
                             digitalWrite(pinNum, LOW); 
                             delay(timer); 
                         } 
