@@ -1,0 +1,121 @@
+<!DOCTYPE html> 
+<html>
+    <head> 
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+        <title>A2: Fade!</title> 
+
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+        
+
+    </head> 
+
+    <body>
+        <div class="header">
+            <h1>A2: Fade!</h1>
+        </div>
+        
+        <div class="banner">
+            <img src="A2-Imgs/fade.gif">
+        </div>
+        
+        <div class="half-display">
+
+            <div>
+                <h2>Schematic</h2>
+                <img src="A2-Imgs/scheme.jpeg">
+            </div>
+            
+            <div>
+                <h2>Calculations</h2>
+                <img src="A2-Imgs/calc.jpg">
+            </div>
+            
+        </div>
+
+        <div class="description">
+            <h2>Circuit-Code Description</h2>
+            <p>The button, the RGB LED, and the red LED are all in parallel to each other. For the button, I use a 10K ohm resistor, for the RGB three 220 ohm resistors, and for the red a single 220 ohm resistor.</p>
+            <p>The RGB LED is wired to the analog inputs of port 9, 10, and 11 for green, blue, and red respectively. The button is wired to port 2 monitoring the state of the button press. The red LED is wired to port 4.</p>
+            <p>If the button is set to the active state, AKA when the button is pressed, the lights will turn on for a little less than 4 seconds after the button is pressed and shut off immediately.</p>
+        </div>
+
+        <div class="half-display">
+            <div>
+                <h2>Code</h2>
+                <code>
+                    
+                    // set pin numbers:
+                    const int buttonPin = 2;     // the number of the pushbutton pin
+                    const int ledPin =  4;      // the number of the LED pin
+                    //the numbers of the RGB pins
+                    const int redPin = 11;
+                    const int greenPin = 10;
+                    const int bluePin = 9;
+
+                    int buttonState = 0;         // variable for reading the pushbutton status
+
+                    void setup() {
+                        // initialize each LED for output
+                        pinMode(ledPin, OUTPUT);
+                        pinMode(redPin, OUTPUT);
+                        pinMode(bluePin, OUTPUT);
+                        pinMode(greenPin, OUTPUT);
+                        // initialize the pushbutton pin as an input:
+                        pinMode(buttonPin, INPUT);
+                    }
+
+                    void loop() {
+                        //read the current state of the button if pressed or not
+                        buttonState = digitalRead(buttonPin);
+
+                        // check if the pushbutton is pressed.
+                        // if it is, the buttonState is HIGH:
+                        if (buttonState == HIGH) {
+                            // turn LED on:
+                            digitalWrite(ledPin, HIGH);
+
+                            //loop through all 255 red values and waiting 5 milliseconds in between each
+                            for(int i = 0; i < 256;i++){
+                            analogWrite(redPin, i);
+                            delay(5);
+                            }
+                        
+                            //loop through all 255 green values and waiting 5 milliseconds in between each
+                            for(int i = 0; i < 256;i++){
+                            analogWrite(greenPin, i);
+                            delay(5);
+                            }
+                        
+                        
+                            //loop through all 255 blue values and waiting 5 milliseconds in between each
+                            for(int i = 0; i < 256;i++){
+                            analogWrite(bluePin, i);
+                            delay(5);
+                            }
+                            
+                        } else {
+                            //if the button is not pressed, turn off all LEDs
+                            digitalWrite(ledPin, LOW);
+                            analogWrite(redPin, 0);
+                            analogWrite(greenPin, 0);
+                            analogWrite(bluePin, 0);
+                        }
+
+                    }
+                </code>
+            </div>
+            
+            <div class="circuit">
+                <h2>Circuit</h2>
+                <img src="A2-Imgs/top-view.png">
+                <img src="A2-Imgs/close.png">
+            </div>
+        </div>
+
+        
+        
+        
+    </body>
+</html>
