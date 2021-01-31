@@ -77,8 +77,11 @@ code {
 }
 
 .banner {
-  height: 100rem;
+  height: 80rem;
+  align-items:center;
+  justify-content:space-between;
 }
+
 
 .half-display {
   display:flex;

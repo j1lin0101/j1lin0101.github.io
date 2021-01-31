@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+    <title>A3: Input Output!</title>
+
+    <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+
+
+</head>
+
+<body>
+    <div class="header">
+        <h1>A3: Input Output!</h1>
+    </div>
+
+    <div class="banner">
+        <center>
+            <img src="A3-Imgs/thermo.gif" >
+        </center>
+        
+    </div>
+
+    <div class="half-display">
+
+        <div>
+            <h2>Schematic</h2>
+            <img src="A3-Imgs/scheme.jpeg">
+        </div>
+
+        <div>
+            <h2>Calculations</h2>
+            <img src="A3-Imgs/calc.jpeg">
+        </div>
+
+    </div>
+
+    <div class="description">
+        <h2>Circuit-Code Description</h2>
+        <p>Using the thermositor and the RGB LED, I was able to create a circuit where the LED changes color based on temperature change.</p>
+        <p>If the thermosistor heats up, the LED will fade to red. If the thermositor cools down and remains stable, the LED will change to blue.</p>
+    </div>
+
+    <div class="half-display">
+        <div>
+            <h2>Code</h2>
+            <code>
+                // select pin for thermosistor
+                int sensorPin = A0;    
+
+                //set RGB pins
+                int redPin = 6;
+                int greenPin = 5;
+                int bluePin = 3;
+
+                //set default values for sensor
+                int sensorValue = 0;  
+
+                // set default brightness to max for each LED
+                int redVal = 255;
+                int greenVal = 255;
+                int blueVal = 255;
+
+                // set default temperature reference to 80degF
+                int currTemp = 80;
+
+                // thermosistor read constants (used for conversion later)
+                float R1 = 10000;
+                float logR2, R2, T;
+                float c1 = 1.009249522e-03, c2 = 2.378405444e-04, c3 = 2.019202697e-07;
+
+                void setup() {
+                Serial.begin(9600);
+
+                //set RGB pins as Outputs
+                pinMode(redPin, OUTPUT);
+                pinMode(greenPin, OUTPUT);
+                pinMode(bluePin, OUTPUT);
+                }
+
+                void loop() {
+                
+                // read the value from the sensor:
+                sensorValue = analogRead(sensorPin);
+
+                // thermositor analog read values to Fahrenheit conversion 
+                // from https://www.circuitbasics.com/arduino-thermistor-temperature-sensor-tutorial/
+                R2 = R1 * (1023.0 / (float)sensorValue - 1.0);
+                logR2 = log(R2);
+                T = (1.0 / (c1 + c2*logR2 + c3*logR2*logR2*logR2));
+                T = T - 273.15;
+                T = (T * 9.0)/ 5.0 + 32.0; 
+
+                // round to nearest whole number
+                int temperature = round(T);
+                
+                // Print Fahrenheit value to Serial Monitor
+                Serial.print("Temperature: "); 
+                Serial.print(T);
+                Serial.println(" F"); 
+
+                // check if thermosistor temperature is rising
+                if(temperature > currTemp) {
+                    
+                    //fade colors to be more red
+                    redVal += 100;
+                    blueVal-= 100;
+                    greenVal = 0;
+                    setColors();
+
+                    //set recently measured temperature as currentTemp
+                    currTemp = T;
+                }
+
+                // if temperature is constant or decreasing
+                else {
+                    
+                    //fade colors to be more blue
+                    redVal -= 100;
+                    blueVal += 100;
+                    greenVal = 0;
+                    setColors();
+
+                    //set recently measured temperature as currentTemp
+                    currTemp = temperature;
+                } 
+
+                // delay change to see results
+                delay(100);
+                }
+
+                void setColors() {
+
+                //if red or blue values reach maximum (255) stay at 255
+                if(redVal >= 255) {
+                    redVal = 255;
+                }
+
+                if(blueVal >= 255) {
+                    blueVal = 255;
+                }
+
+                //if red or blue values reach minimum (0) stay at 0
+                if(redVal <= 0) {
+                    redVal = 0;
+                }
+
+                if(blueVal <= 0) {
+                    blueVal = 0;
+                }
+
+                // update pins with new values
+                analogWrite(redPin, redVal);
+                analogWrite(greenPin, greenVal);
+                analogWrite(bluePin, blueVal);
+
+                // delay change to see results
+                delay(10);
+                }
+
+                </code>
+        </div>
+
+        <div class="circuit">
+            <h2>Circuit</h2>
+            <img src="A3-Imgs/top-view.png">
+            <img src="A3-Imgs/close.png">
+        </div>
+    </div>
+
+
+
+
+</body>
+
+</html>
