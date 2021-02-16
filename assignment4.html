@@ -1,0 +1,105 @@
+<!DOCTYPE html> 
+<html>
+    <head> 
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+        <title>A4: Libraries!</title> 
+
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+        
+
+    </head> 
+
+    <body>
+        <div class="header">
+            <h1>A4: Libraries!</h1>
+        </div>
+        
+        <div class="banner">
+            <center>
+                <img src="A4-Imgs/lcd.gif">
+            </center>
+            
+        </div>
+        
+        <div class="half-display">
+
+            <div>
+                <h2>Schematic</h2>
+                <img src="A4-Imgs/scheme.png">
+            </div>
+            
+            <div>
+                <h2>Calculations</h2>
+                <p>Since the LCD requires a resistance of 0-20kΩ, I decided to use the 10kΩ	Potentiometer, giving a range of 50Ω to 10kΩ (based on the datasheet).</p>
+                <p>From that, the current of that system ranges from 0.5mA to 0.1A</p> 
+                <p>To power the LED backlight, I used a 220Ω resistor to keep the current at 20mA from the 5V power source.</p>
+            </div>
+            
+        </div>
+
+        <div class="description">
+            <h2>Circuit-Code Description</h2>
+            <p>The interaction with the circuit is very simple. Using the DHT11 Temperature and Humidity sensor and the LiquidCrystal Display, I created a circuit that reads the temperature and humidity.</p>
+            <p>After a second, the sensor will read a new temperature and humidity and display each value on their own line on the LCD.</p>
+            
+        </div>
+
+        <div class="half-display">
+            <div>
+                <h2>Code</h2>
+                <code>
+                    
+                    //Import LiquidCrystal and DHT Libraries
+                    #include <LiquidCrystal.h>
+                    #include <dht.h>
+
+                    //Set Temp/Humidity Sensor to Pin 7
+                    dht DHT;
+                    #define DHT11_PIN 7
+
+                    //Initialize LiquidCrystal Display to respective pins
+                    LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+                    void setup() {
+                    //Set crystal display to 2 rows of 16 character lengths
+                    lcd.begin(16, 2);
+                    }
+
+                    void loop() {
+                    //clear LiquidCrystal display from last time
+                    lcd.clear();
+
+                    //Set Cursor to top left corner
+                    lcd.setCursor(0, 0);
+
+                    //Read Temperature and Humidity from Sensor
+                    int chk = DHT.read11(DHT11_PIN);
+
+                    //Print Temperature Reading on first row
+                    lcd.print("Temp = ");
+                    lcd.print(DHT.temperature);
+                    lcd.setCursor(0, 1);
+                    
+                    //Print Humidity Reading on second row
+                    lcd.print("Hum = ");
+                    lcd.print(DHT.humidity);
+                    delay(1000);
+
+                    }
+                </code>
+            </div>
+            
+            <div class="circuit">
+                <h2>Circuit</h2>
+                <img src="A4-Imgs/top-view.png">
+                <img src="A4-Imgs/close.png">
+            </div>
+        </div>
+
+        
+        
+        
+    </body>
+</html>

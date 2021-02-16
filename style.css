@@ -77,9 +77,12 @@ code {
 }
 
 .banner {
-  height: 80rem;
   align-items:center;
-  justify-content:space-between;
+  justify-content:center;
+}
+
+.banner img {
+  width: 40rem;
 }
 
 
