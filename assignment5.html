@@ -1,0 +1,130 @@
+<!DOCTYPE html> 
+<html>
+    <head> 
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+        <title>A5: Libraries!</title> 
+
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+        
+
+    </head> 
+
+    <body>
+        <div class="header">
+            <h1>A5: High(er) voltage and transistors!</h1>
+        </div>
+        
+        <div class="banner">
+            <center>
+                <img src="A5-Imgs/fan.gif">
+            </center>
+            
+        </div>
+        
+        <div class="half-display">
+
+            <div>
+                <h2>Schematic</h2>
+                <img src="A5-Imgs/scheme.png">
+            </div>
+            
+            <div>
+                <h2>Calculations</h2>
+                <p>Since the motor needs a maximum of 6V, I used the transistor to limit the voltage going through from the 9V battery.</p>
+                <p>Paired with the potentiometer as an analog input, I was able to decrease the speed of the motor by half, meaning that 4.5V were going through the motor.</p> 
+                <p>Knowing from the datasheet that the ideal current is 0.03A, we know that the internal resistance of the motor is 1.5ohms</p>
+            </div>
+            
+        </div>
+
+        <div class="description">
+            <h2>Circuit-Code Description</h2>
+            <p>Using the DHT11 Temperature and Humidity sensor, I was able to get the current temperature of the room.</p>
+            <p>If the temperature sensor gave a reading above 70 degrees Fahrenheit (aka room temperature), the fan would turn on.</p>
+            <p>Once the temperature resolved back to room temperature, the fan would turn off.</p> 
+            
+        </div>
+
+        <div class="half-display">
+            <div>
+                <h2>Code</h2>
+                <code>
+                    
+                    //DC Motor code courtesy of 
+                    //https://create.arduino.cc/projecthub/danielrossitv/control-dc-motor-with-npn-transistor-arduino-pwm-cdaf2e
+
+
+                    //Add DHT library for temperature sensor
+                    #include <dht.h>
+                    dht DHT;
+
+                    //Define sensor pin at Pin 7
+                    #define DHT11_PIN 7
+
+                    //Define CD motor pin at Pin 3
+                    #define pwm 3
+
+                    //Define Potentiometer at Pin A0
+                    #define pot A0
+
+                    void setup() {
+                    //Initialize Motor as an output
+                        pinMode(pwm,OUTPUT);
+                        
+                        //Initialize Potentiomete as an input
+                        pinMode(pot,INPUT); 
+
+                        //Begin serial monitor to see values
+                        Serial.begin(9600);
+
+                        //reset speed of motor at 0
+                        analogWrite(pwm,0);
+
+                    }
+
+                    void loop() {
+
+                        //Read current Temperature value from sensor
+                        int chk = DHT.read11(DHT11_PIN);
+                        float temp = DHT.temperature;
+
+                        //Map Values to remove outliers
+                        temp = map(temp, 50, 90, 0, 255);
+
+                        //Print current temperature
+                        Serial.print("Temperature = ");
+                        Serial.println(temp);
+
+                        //Check current potentiometer value and print
+                        float val = analogRead(pot);
+                        float duty = map(val,0,1023,0,255);
+                        Serial.println(duty);
+
+                        //Check the temperature is over 80 deg F
+                        if(temp > 70) {
+                            //Turn on fan by speed determined by potentiometer
+                            analogWrite(pwm, duty); 
+
+                        } else {
+                            //Turn off fan otherwise
+                            analogWrite(pwm, 0);
+                        }
+                        
+                    }
+                </code>
+            </div>
+            
+            <div class="circuit">
+                <h2>Circuit</h2>
+                <img src="A5-Imgs/top-view.png">
+                <img src="A5-Imgs/close.png">
+            </div>
+        </div>
+
+        
+        
+        
+    </body>
+</html>
