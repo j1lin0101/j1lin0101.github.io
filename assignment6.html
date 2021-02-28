@@ -1,0 +1,274 @@
+<!DOCTYPE html> 
+<html>
+    <head> 
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+        <title>A6: Talking to the web!</title> 
+
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+        
+
+    </head> 
+
+    <body>
+        <div class="header">
+            <h1>A6: Talking to the web!</h1>
+        </div>
+        
+        <div class="banner">
+            <center>
+                <img src="A6-Imgs/stick.gif">
+            </center>
+            
+        </div>
+        
+        <div class="half-display">
+
+            <div>
+                <h2>Schematic</h2>
+                <img src="A6-Imgs/scheme.png">
+            </div>
+            
+            <div>
+                <h2>Calculations</h2>
+                <p>According to the data sheet, the ideal current for each color of the RGB LED is 20mA. So, I used a 220 ohm resistor (more than the 160 ohm requirement) for each color for the 5 volts going in.</p> 
+                <p>With the voltage drop of after each color being 1.8V, this left a final voltage of 3.2 volts going into ground for each color.</p>
+            </div>
+            
+        </div>
+
+        <div class="description">
+            <h2>Circuit-Code Description</h2>
+            <p>Using the joystick, I mapped the red and green color values to x and y respectively.</p> 
+            <p>For every change in position there would be an equivalent change in color.</p> 
+            <p>These values would be sent to the server via the serial monitor and p5.</p>
+            <p>Within p5, the left and right arrow keys manipulate the blue values.</p>
+            <p>With the values from the joystick and the arrow keys, the background of the webpage would change.</p>
+            <p>These RGB values would be sent back to the Arduino to be used by the RGB LED.</p>
+            
+        </div>
+        <center>
+            <h2>Code</h2>
+        </center>
+        
+        <div class="half-display">
+            <div>
+                <h3>Arduino Code</h3>
+                <code>
+                    
+                    //Set Joystick Pins
+                    int x = A1;
+                    int y = A0;
+                    
+                    //Create Initial Values for X and Y positions on Joystick
+                    int xval = 0;
+                    int yval = 0;
+                    
+                    //Set LED Pins for RGB LED
+                    int red = 9;
+                    int green = 10;
+                    int blue = 11;
+                    
+                    void setup() {
+                        //Initialize Serial
+                        Serial.begin(9600);
+                        
+                        //Initialize Joystick Pins as Inputs
+                        pinMode(x, INPUT);
+                        pinMode(y, INPUT);
+                        
+                        //Initialize RGB LED Pins
+                        pinMode(red, OUTPUT);
+                        pinMode(green, OUTPUT);
+                        pinMode(blue, OUTPUT);
+                    }
+                    
+                    void loop() {
+                        //Read X and Y values from Joystick
+                        xval = analogRead(x);
+                        yval = analogRead(y);
+                        
+                        //Map X and Y values according and convert to LED brightness values
+                        xval = map(xval, 0, 1023, 0, 255);
+                        yval = map(yval, 0, 1023, 0, 255);
+                        
+                        //Send X and Y values as an array to Serial Monitor
+                        Serial.print("[");
+                        Serial.print(xval);
+                        Serial.print(",");
+                        Serial.print(yval);
+                        Serial.println("]");
+                        
+                        //Only change LED values if p5 returns values
+                        if(Serial.available() > 0){
+                        
+                            //Read Serial results as one comma-separated string
+                            String colorString = Serial.readString();
+                            
+                            //Break up color string by commas
+                            String redString = getValue(colorString, ',', 0);
+                            String greenString = getValue(colorString, ',', 1);
+                            String blueString = getValue(colorString, ',', 2);
+                            
+                            //Convert color strings to integers
+                            int redValue = redString.toInt();
+                            int greenValue = greenString.toInt();
+                            int blueValue = blueString.toInt();
+                            
+                            //Set each RGB pin to the Integer Value
+                            analogWrite(red, redValue);
+                            analogWrite(green, greenValue);
+                            analogWrite(blue, blueValue);
+                        }
+                        delay(100);
+                    }
+                    
+                    //Function to break apart strings based on a char separator
+                    //Courtesy of https://arduino.stackexchange.com/questions/1013/how-do-i-split-an-incoming-string
+                    String getValue(String data, char separator, int index){
+                        int found = 0;
+                        int strIndex[] = { 0, -1 };
+                        int maxIndex = data.length() - 1;
+                        
+                        for (int i = 0; i <= maxIndex && found <=index; i++) { 
+                            if (data.charAt(i)==separator || i==maxIndex) { 
+                                found++;
+                                strIndex[0]=strIndex[1] + 1; strIndex[1]=(i==maxIndex) ? i+1 : i; 
+                            } 
+                        } 
+                        return found> index ? data.substring(strIndex[0], strIndex[1]) : "";
+                    }
+
+                </code>
+            </div>
+            <div>
+                <h3>p5 Code</h3>
+                <code>
+                    //Set Serial
+                    var serial;
+                    
+                    //Set Port by name
+                    var portName = '/dev/tty.usbmodem1434401';
+                    
+                    //Set empty array to receive data from Arduino
+                    var dataarray = [];
+                    
+                    //Set base value of blue to 125
+                    var blue = 125;
+                    
+                    
+                    function setup() {
+                        serial = new p5.SerialPort(); // make a new instance of the serialport library
+                        serial.on('list', printList); // set a callback function for the serialport list event
+                        serial.on('connected', serverConnected); // callback for connecting to the server
+                        serial.on('open', portOpen); // callback for the port opening
+                        serial.on('data', serialEvent); // callback for when new data arrives
+                        serial.on('error', serialError); // callback for errors
+                        serial.on('close', portClose); // callback for the port closing
+                        
+                        serial.list(); // list the serial ports
+                        serial.open(portName); // open a serial port
+                        createCanvas(1200, 800);
+                        background(0x08, 0x16, 0x40);
+                    }
+                    
+                    //Utility functions to ensure that ports and serial are working
+                    // get the list of ports:
+                    function printList(portList) {
+                        // portList is an array of serial port names
+                        for (var i = 0; i < portList.length; i++) { 
+                            // Display the list the console: print(i + " " + portList[i]); 
+                        } 
+                    } 
+                    function serverConnected() { 
+                        print('connected to server.'); 
+                    } 
+                    function portOpen() { 
+                        print('the serial port opened.') 
+                    }
+                    function serialError(err) { 
+                        print('Something went wrong with the serial port. ' + err);
+                    }
+                                        
+                    function portClose() {
+                        print(' The serial port closed.'); 
+                    } 
+
+                    function serialEvent() { 
+                        if (serial.available()) { 
+                            var datastring=serial.readLine(); // readin some serial 
+                            var newarray; //Read Arduino serial data and catch errors 
+                            try {
+                                newarray=JSON.parse(datastring); // can we parse the serial 
+                            } catch(err) { 
+                                console.log(err); 
+                            } if (typeof(newarray)=='object' ) { 
+                                //Initialize data from Arduino dataarray=newarray; 
+                            } 
+                            //Use console to check values
+                            console.log("got back " + datastring);
+                        }
+                    }
+                    
+                    function keyPressed() {
+                    
+                        //Check if the original value is a number
+                        if (isNaN(blue)) {            
+                            //If the value is not a number set blue's value to 0
+                            blue = 0;
+                        } else {
+                    
+                            //If the Right Arrow Key is pressed add 30 to blue's value
+                            if (keyCode === RIGHT_ARROW) {
+                                blue += 30;
+                    
+                                //If blue's value exceeds 255 reset to 0
+                                if(blue >= 255) {
+                                    blue = 0;
+                                }
+                    
+                            //If the Right Arrow Key is pressed subtract 30 to blue's value
+                            } else if (keyCode === LEFT_ARROW) {
+                                blue -= 30;
+                
+                                //If blue's value is less than 0 reset to 255
+                                if(blue <= 0) {
+                                    blue = 255;
+                                }
+                            }
+                        }
+                                        
+                    }
+                    
+                    function draw() {
+                        //Set background to the values sent from the arduino as red and green 
+                        // and set the from the arrow keys as blue
+                        background(dataarray[0], dataarray[1], blue);
+                    
+                        //Make a new array of each RGB value to be sent to the arduino
+                        var red = dataarray[0];
+                        var green = dataarray[1];
+                        var outputArray = [red, green, blue];
+                    
+                        //Combine the new array as a single comma-separated string to Arduino
+                        var output = outputArray.join(',') + " ," console.log("output=" + output)
+                    
+                        //Write to serial
+                        serial.write(output);
+                    }
+
+                </code>
+            </div>
+        </div>
+
+        <center>
+            <div class="circuit">
+                <h2>Circuit</h2>
+                <img src="A6-Imgs/top-view.png">
+                <img src="A6-Imgs/close.png">
+            </div>
+        </center>
+        
+    </body>
+</html>
