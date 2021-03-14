@@ -1,0 +1,208 @@
+<!DOCTYPE html> 
+<html>
+    <head> 
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+        <title>Final Project</title> 
+
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+        
+
+    </head> 
+
+    <body>
+        <div class="header">
+            <h1>Final Project: Guitar Looper Web Interaction</h1>
+        </div>
+        
+        <div class="banner">
+            <center>
+                <img src="Final-Imgs/pedal.gif">
+            </center>
+            
+        </div>
+        
+        <div class="description">
+            <h2>Background</h2>
+            <p>This project went through many extreme iterations.</p>
+            <p>The initial intent was to make an audio visualizer for guitar looper users.</p>
+            <p>A guitar looper is a tool used for solo musicians to essentially play a recording of any noises they play on their instrument.</p>
+            <p>However due to many delays in Amazon delivery and technical errors in my initial plan, I had to change gears.</p>
+            <p>I broke my plan down to two core elements: interaction with a guitar pedal and a visual representation.</p>
+            <p>So I settled on this final iteration, where a capacitive sensor reads physical touch with the pedal and p5 displays the current interaction.</p>
+
+            <h2>More on the Process</h2>
+            <iframe src="https://drive.google.com/file/d/1HiFPZHkLcZJiK9pZvo2Oi6pNJ-HfNyV2/preview" width="640" height="480"></iframe>
+            
+        </div>
+        
+        <div class="half-display">
+
+            <div>
+                <h2>Schematic</h2>
+                <img src="Final-Imgs/scheme.png">
+            </div>
+            
+            <div>
+                <h2>Calculations</h2>
+                <p>With the capacitive sensing functionality in the Arduino, signal are sent from Pin 4 to Pin 2.</p> 
+                <p>I used a 1MOhm resistor to ensure that only direct physical contact with the guitar pedal would activate any circuitry.</p>
+                <p>With a 1MOhm resistor in between this means that the current is 0.01 mA from 5V.</p>
+            </div>
+            
+        </div>
+
+        <div class="description">
+            <h2>Circuit-Code Description</h2>
+            <p>Using the capacitive sensing functionality in the Arduino, I monitored any physical touch interaction from my guitar pedal.</p>
+            <p>When the guitar pedal button is pressed, the Arduino will recognize the touch and change states (e.g. active to passive).</p>
+            <p>p5 will take this serial output and change background color and text to each respective change.</p>
+            
+        </div>
+        <center>
+            <h2>Code</h2>
+        </center>
+        
+        <div class="half-display">
+            <div>
+                <h3>Arduino Code</h3>
+                <code>
+                    
+                    //Add Capacitive Sensor Library
+                    #include <CapacitiveSensor.h>
+
+                    //Initialize New Sensor
+                    //Pin 4 is the sending pin
+                    //Pin 2 receives the signal
+                    CapacitiveSensor   cs_4_2 = CapacitiveSensor(4,2);      
+
+                    //Initialize Guitar Pedal State as Off
+                    int state = 0;
+
+                    // Capacitive Sensor Code courtesy of Arduino Documentation Example: Threshold
+                    // https://playground.arduino.cc/Main/CapacitiveSensor/
+
+                    unsigned long csSum;
+
+                    void setup() {
+                    cs_4_2.set_CS_AutocaL_Millis(0xFFFFFFFF);  // turn off autocalibrate 
+                    Serial.begin(9600);
+                    }
+
+                    void loop()                  
+                    {
+                    long cs = cs_4_2.capacitiveSensor(80); //a: Sensor resolution is set to 80
+                    if (cs > 100) { 
+                        csSum += cs;
+
+                        //When the physical touch threshold is met change the state
+                        if (csSum >= 8000) 
+                        {
+                        if (state == 0) {
+                            state = 1;
+                        } else if (state == 1) {
+                            state = 0;
+                        }
+                        //Send the state to the website
+                        Serial.println(state);
+                        if (csSum > 0) { csSum = 0; } //Reset
+                        cs_4_2.reset_CS_AutoCal(); //Stops readings
+                        delay(1000);
+                    
+                        }
+                    } else {
+                        csSum = 0; //Timeout caused by bad readings
+                    }
+                    
+                    }
+
+                </code>
+            </div>
+            <div>
+                <h3>p5 Code</h3>
+                <code>
+                    var serial; // variable to hold an instance of the serialport library
+                    var portName = '/dev/tty.usbmodem1434401' //rename to the name of your port
+                    var backgrounds = ['red', 'green'];
+                    var currBackground;
+
+
+                    function setup() {
+
+                        //Initialize Canvas
+                        let cnv =   createCanvas(windowWidth, windowHeight);
+
+                        //Open Serial Port
+                        serial = new p5.SerialPort();
+
+                        serial.list();
+                        serial.open('/dev/tty.usbmodem1434401');
+
+                        serial.on('connected', serverConnected);
+
+                        serial.on('list', gotList);
+
+                        serial.on('data', gotData);
+
+                        serial.on('error', gotError);
+
+                        serial.on('open', gotOpen);
+
+                        serial.on('close', gotClose);
+
+                        //Set background to grey on load
+                        currBackground= 'grey';
+                    }
+
+                    function draw(){
+                        //Set Background and Text Styling
+                        background(currBackground);
+                        textAlign(CENTER, CENTER);
+
+                    }
+
+
+                    function gotData() {
+                        //Read and Process Data from Serial
+                        let currentString = serial.readLine();
+                        trim(currentString);
+
+                        if (!currentString) return;
+                        currentString = parseInt(currentString);
+
+                        //Set background based on state from serial
+                        currBackground = backgrounds[currentString];
+                        background(currBackground);
+
+                        //Set text based on state from serial
+                        if (currentString === 1) {
+                            textSize(32);
+                            fill(255);
+                            text('Looper Recording', width/2, height/2);
+
+                        } else if (currentString === 0) {
+                            textSize(32);
+                            fill(255);
+                            text('Looper Not Recording', width/2, height/2); 
+                        }
+                        latestData = currentString;
+                    }
+
+
+
+
+                </code>
+            </div>
+        </div>
+
+        <center>
+            <div class="circuit">
+                <h2>Circuit</h2>
+                <img src="Final-Imgs/top-view.png">
+                <img src="Final-Imgs/close.png">
+            </div>
+        </center>
+        
+    </body>
+</html>
